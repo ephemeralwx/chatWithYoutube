@@ -75,15 +75,18 @@ if __name__ == '__main__':
     app.run()
 '''
 from flask import Flask, request, jsonify
-from transformers import BertTokenizer, BertForQuestionAnswering
+from transformers import DistilBertTokenizer, DistilBertForQuestionAnswering
+
 import torch
 
 app = Flask(__name__)
 
 # Load a fine-tuned BERT model and tokenizer
-MODEL_NAME = "bert-large-uncased-whole-word-masking-finetuned-squad"
-tokenizer = BertTokenizer.from_pretrained(MODEL_NAME)
-model = BertForQuestionAnswering.from_pretrained(MODEL_NAME)
+MODEL_NAME = "distilbert-base-uncased-distilled-squad"
+
+tokenizer = DistilBertTokenizer.from_pretrained(MODEL_NAME)
+model = DistilBertForQuestionAnswering.from_pretrained(MODEL_NAME)
+
 
 # Optimize model for inference
 model.eval()
