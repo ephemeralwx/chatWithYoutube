@@ -10,6 +10,12 @@ from langchain.llms import OpenAI
 
 app = Flask(__name__)
 
+# Setting up OpenAI API key
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY not set in environment variables")
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
 # We'll use a dictionary to store video content in-memory
 video_data = {}
 
