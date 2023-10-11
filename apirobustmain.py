@@ -98,27 +98,36 @@ def store_transcript():
     video_id = request.json.get('video_id')
 
     if not video_id:
-        return jsonify({"error": "video_id is missing"}), 400
+        return jsonify({"message": "video_id is missing"}), 400
 
     # Fetching transcript from YouTube
     try:
         transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
+        app.logger.info(f"transcript_data={transcript_data}")
         transcript = ' '.join([entry['text'] for entry in transcript_data])
+        app.logger.info(f"transcript={transcript}")
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
     video_data[video_id] = transcript
     return jsonify({"message": "Transcript stored successfully!"})
 
+@app.route('/health',methods=['GET'])
+def hello():
+    return "Hello Kevin"
+
 @app.route('/ask', methods=['POST'])
 def ask():
+    app.logger.info("Here is ask")
     video_id = request.json.get('video_id')
     query = request.json.get('query')
-
+    app.logger.info(video_id)
+    app.logger.info(query)
     if not video_id or not query:
         return jsonify({"error": "video_id or query missing"}), 400
-
+    app.logger.info(video_data)
     transcript = video_data.get(video_id)
+    app.logger.info(transcript)
     if not transcript:
         return jsonify({"error": "No transcript found for the given video_id"}), 400
 
@@ -131,11 +140,12 @@ def ask():
         answer_end = torch.argmax(output.end_logits)
 
     answer = tokenizer.decode(input_ids[answer_start:answer_end+1], skip_special_tokens=True)
-
+    app.logger.info(answer)
     if answer:
         return jsonify({"answer": answer})
     else:
-        return jsonify({"error": "Unable to extract a clear answer"}), 400
+        return jsonify({"answer": "Unable to extract a clear answer"}), 400
 
 if __name__ == '__main__':
+    #app.run(host="0.0.0.0",port=80,debug=True)
     app.run()
