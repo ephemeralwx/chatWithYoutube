@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
 import os
-import shutil
-from langchain.document_loaders import YoutubeLoader
+import re
+import json
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
+from youtube_transcript_api import YouTubeTranscriptApi
 
 app = Flask(__name__)
 
@@ -21,19 +22,27 @@ video_data = {}
 
 @app.route('/ask', methods=['POST'])
 def ask():
-    video_id = request.json.get('video_id')
+    video_link = request.json.get('video_link')
     query = request.json.get('query')
+
+    # Extract video_id from the link
+    video_id_match = re.search(r'v=([^&]+)', video_link)
+    if video_id_match:
+        video_id = video_id_match.group(1)
+    else:
+        return jsonify({"error": "Video ID not found in the URL."}), 400
 
     if not video_id or not query:
         return jsonify({"error": "video_id or query missing"}), 400
 
     # If the video's content is not in memory, fetch and process it
     if video_id not in video_data:
-        loader = YoutubeLoader(video_id)
-        documents = loader.load()
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        text_values = [item['text'] for item in transcript]
+        documents = ' '.join(text_values)
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-        documents = text_splitter.split_documents(documents)
+        documents = text_splitter.split_documents([documents])
 
         vectordb = Chroma.from_documents(
             documents,
@@ -60,7 +69,6 @@ def ask():
         return jsonify({"answer": response['result']})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run()
