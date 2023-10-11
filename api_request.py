@@ -23,7 +23,7 @@ def test_transcribe():
         print(resp.text)
 
 def test_ask():
-    test_transcribe()
+    #test_transcribe()
     SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/ask'  # change to url of you Cloud Run service
     #SERVICE_URL = 'http://127.0.0.1:80/ask'  # change to url of you Cloud Run service
 
@@ -39,6 +39,18 @@ def test_ask():
         print("Error occurred!")  
         print(resp.status_code)
 
+def test_health():
+    
+    SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/health'  # change to url of you Cloud Run service
+    #SERVICE_URL = 'http://127.0.0.1:80/ask'  # change to url of you Cloud Run service
 
+
+    resp = requests.get(SERVICE_URL)
+    if resp.status_code == 200:
+        print(resp.text)
+    else:
+        print("Error occurred!")  
+        print(resp.status_code)
 #test_transcribe()
+#test_health()
 test_ask()
