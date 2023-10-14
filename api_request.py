@@ -5,35 +5,19 @@ test API
 import requests
 import base64
 
-""" def getSoma():
-    import pandas as pd
-    url = "https://markets.newyorkfed.org/api/soma/summary.json"
-    data = requests.get(url).json()
-    df = pd.DataFrame(data["soma"]["summary"])
-    df.to_csv("soma_summary.csv") """
-    
-def test_transcribe():
-    SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/store_transcript'  # change to url of you Cloud Run service
-    #SERVICE_URL = 'http://127.0.0.1:80/store_transcript'
-    resp = requests.post(SERVICE_URL, json={'video_id':"MYCkEn19XR0"})
-    if resp.status_code == 200:
-        out_content = resp.json().get('message', '')
-        print(out_content)
-    else:
-        print(resp.text)
 
-def test_ask():
+def test_chatyoutube():
     #test_transcribe()
-    SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/ask'  # change to url of you Cloud Run service
-    #SERVICE_URL = 'http://127.0.0.1:80/ask'  # change to url of you Cloud Run service
+    #SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/chatyoutube'  # change to url of you Cloud Run service
+    SERVICE_URL = 'http://127.0.0.1:5000/chatyoutube'  # change to url of you Cloud Run service
+    youtube_url = 'https://www.youtube.com/watch?v=MYCkEn19XR0'
 
-
-    resp = requests.post(SERVICE_URL, json={'video_id':"MYCkEn19XR0",
+    resp = requests.post(SERVICE_URL, json={'user_id':"MYCkEn19XR0",'youtube_url':youtube_url,
                                             'query':'What tools do I need to cut my own hair?'})
     if resp.status_code == 200:
-        out_content = resp.json().get('answer','')
-        print(out_content)
-        print("================================")
+        #out_content = resp.json().get('answer','')
+        #print(out_content)
+        #print("================================")
         print(resp.text)
     else:
         print("Error occurred!")  
@@ -41,8 +25,8 @@ def test_ask():
 
 def test_health():
     
-    SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/health'  # change to url of you Cloud Run service
-    #SERVICE_URL = 'http://127.0.0.1:80/ask'  # change to url of you Cloud Run service
+    #SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/health'  # change to url of you Cloud Run service
+    SERVICE_URL = 'http://127.0.0.1:80/ask'  # change to url of you Cloud Run service
 
 
     resp = requests.get(SERVICE_URL)
@@ -53,4 +37,4 @@ def test_health():
         print(resp.status_code)
 #test_transcribe()
 #test_health()
-test_ask()
+test_chatyoutube()

@@ -116,41 +116,77 @@ def store_transcript():
 def hello():
     return "Hello Kevin"
 
-@app.route('/ask', methods=['POST'])
-def ask():
-    app.logger.info("Here is ask")
-    video_id = request.json.get('video_id')
-    query = request.json.get('query')
-    app.logger.info(video_id)
-    app.logger.info(query)
-    if not video_id or not query:
-        return jsonify({"error": "video_id or query missing"}), 400
-    app.logger.info(video_data)
-
-    transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
-    app.logger.info(f"transcript_data={transcript_data}")
-    transcript = ' '.join([entry['text'] for entry in transcript_data])
-    app.logger.info(f"transcript={transcript}")
-    video_data[video_id] = transcript
-    transcript = video_data.get(video_id)
-    app.logger.info(transcript)
-    if not transcript:
-        return jsonify({"error": "No transcript found for the given video_id"}), 400
-
-    # Tokenize and predict
-    with torch.no_grad():
-        inputs = tokenizer.encode_plus(query, transcript, return_tensors="pt", max_length=512, truncation=True)
-        input_ids = inputs["input_ids"].tolist()[0]
-        output = model(**inputs)
-        answer_start = torch.argmax(output.start_logits)
-        answer_end = torch.argmax(output.end_logits)
-
-    answer = tokenizer.decode(input_ids[answer_start:answer_end+1], skip_special_tokens=True)
-    app.logger.info(answer)
-    if answer:
-        return jsonify({"answer": answer})
+@app.route('/chatyoutube', methods=['POST','GET'])
+def chatyoutube():
+    if request.method == 'POST':
+        data = request.get_json()
+        youtube_url = data.get('youtube_url','')
+        app.logger.info(f'youtube_url={youtube_url}')
+        question = data.get('question','')
+        user_id = data.get('user_id','')
+        
+        resp = chat_with_youtube(user_id,youtube_url,question)
+        return resp
     else:
-        return jsonify({"answer": "Unable to extract a clear answer"}), 400
+        return jsonify({'error': 'use POST method'})
+    
+
+# @app.route('/ask', methods=['POST'])
+# def ask():
+#     app.logger.info("Here is ask")
+#     video_id = request.json.get('video_id')
+#     query = request.json.get('query')
+#     app.logger.info(video_id)
+#     app.logger.info(query)
+#     if not video_id or not query:
+#         return jsonify({"error": "video_id or query missing"}), 400
+#     app.logger.info(video_data)
+
+#     transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
+#     app.logger.info(f"transcript_data={transcript_data}")
+#     transcript = ' '.join([entry['text'] for entry in transcript_data])
+#     app.logger.info(f"transcript={transcript}")
+#     video_data[video_id] = transcript
+#     transcript = video_data.get(video_id)
+#     app.logger.info(transcript)
+#     if not transcript:
+#         return jsonify({"error": "No transcript found for the given video_id"}), 400
+
+#     # Tokenize and predict
+#     with torch.no_grad():
+#         inputs = tokenizer.encode_plus(query, transcript, return_tensors="pt", max_length=512, truncation=True)
+#         input_ids = inputs["input_ids"].tolist()[0]
+#         output = model(**inputs)
+#         answer_start = torch.argmax(output.start_logits)
+#         answer_end = torch.argmax(output.end_logits)
+
+#     answer = tokenizer.decode(input_ids[answer_start:answer_end+1], skip_special_tokens=True)
+#     app.logger.info(answer)
+#     if answer:
+#         return jsonify({"answer": answer})
+#     else:
+#         return jsonify({"answer": "Unable to extract a clear answer"}), 400
+    
+def chat_with_youtube(user_id,youtube_url,question):
+    #https://betterprogramming.pub/youtube-chatbot-using-langchain-and-openai-f8faa8f34929
+    from dotenv import load_dotenv
+    from langchain.document_loaders import YoutubeLoader
+    from langchain.indexes import VectorstoreIndexCreator
+    from pytube import extract
+    
+    load_dotenv('.env')
+  
+    #https://gist.github.com/ivansaul/ac2794ecbddec6c54f1c2e62cccfc175
+    video_id = extract.video_id(youtube_url)
+    
+    loader = YoutubeLoader(video_id)
+    docs = loader.load()
+    
+    index = VectorstoreIndexCreator()
+    index = index.from_documents(docs)
+    
+    response = index.query(question)
+    return response
 
 if __name__ == '__main__':
     #app.run(host="0.0.0.0",port=80,debug=True)
