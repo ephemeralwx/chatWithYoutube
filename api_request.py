@@ -8,8 +8,8 @@ import base64
 
 def test_chatyoutube():
     #test_transcribe()
-    #SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/chatyoutube'  # change to url of you Cloud Run service
-    SERVICE_URL = 'http://127.0.0.1:5000/chatyoutube'  # change to url of you Cloud Run service
+    SERVICE_URL = 'https://chatwithyoutubevideo.onrender.com/chatyoutube'  # change to url of you Cloud Run service
+    #SERVICE_URL = 'http://127.0.0.1:5000/chatyoutube'  # change to url of you Cloud Run service
     youtube_url = 'https://www.youtube.com/watch?v=MYCkEn19XR0'
 
     resp = requests.post(SERVICE_URL, json={'user_id':"MYCkEn19XR0",'youtube_url':youtube_url,

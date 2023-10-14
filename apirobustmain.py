@@ -83,38 +83,38 @@ import torch
 app = Flask(__name__)
 
 # Load a fine-tuned BERT model and tokenizer
-MODEL_NAME = "distilbert-base-uncased-distilled-squad"
-tokenizer = DistilBertTokenizer.from_pretrained(MODEL_NAME)
-model = DistilBertForQuestionAnswering.from_pretrained(MODEL_NAME)
+# MODEL_NAME = "distilbert-base-uncased-distilled-squad"
+# tokenizer = DistilBertTokenizer.from_pretrained(MODEL_NAME)
+# model = DistilBertForQuestionAnswering.from_pretrained(MODEL_NAME)
 
-# Optimize model for inference
-model.eval()
+# # Optimize model for inference
+# model.eval()
 
 # In-memory storage for video transcripts
-video_data = {}
+# video_data = {}
 
-@app.route('/store_transcript', methods=['POST'])
-def store_transcript():
-    video_id = request.json.get('video_id')
+# @app.route('/store_transcript', methods=['POST'])
+# def store_transcript():
+#     video_id = request.json.get('video_id')
 
-    if not video_id:
-        return jsonify({"message": "video_id is missing"}), 400
+#     if not video_id:
+#         return jsonify({"message": "video_id is missing"}), 400
 
-    # Fetching transcript from YouTube
-    try:
-        transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
-        app.logger.info(f"transcript_data={transcript_data}")
-        transcript = ' '.join([entry['text'] for entry in transcript_data])
-        app.logger.info(f"transcript={transcript}")
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+#     # Fetching transcript from YouTube
+#     try:
+#         transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
+#         app.logger.info(f"transcript_data={transcript_data}")
+#         transcript = ' '.join([entry['text'] for entry in transcript_data])
+#         app.logger.info(f"transcript={transcript}")
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 400
 
-    video_data[video_id] = transcript
-    return jsonify({"message": "Transcript stored successfully!"})
+#     video_data[video_id] = transcript
+#     return jsonify({"message": "Transcript stored successfully!"})
 
-@app.route('/health',methods=['GET'])
-def hello():
-    return "Hello Kevin"
+# @app.route('/health',methods=['GET'])
+# def hello():
+#     return "Hello Kevin"
 
 @app.route('/chatyoutube', methods=['POST','GET'])
 def chatyoutube():
